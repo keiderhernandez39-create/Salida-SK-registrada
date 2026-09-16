@@ -34,10 +34,58 @@ h1 {
   text-align: center;
   font-weight: bold;
 }
+
+#contador {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+}
 </style>
 </head>
 
 <body>
-  <h1>Salida registrada</h1>
+
+<div id="contador">...</div>
+<h1>Salida registrada</h1>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  runTransaction
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD3OL2AenQRwc1zpjQ88z05P1a7XbIXuXY",
+  authDomain: "salida-sk-registrada.firebaseapp.com",
+  databaseURL: "https://salida-sk-registrada-default-rtdb.firebaseio.com",
+  projectId: "salida-sk-registrada",
+  storageBucket: "salida-sk-registrada.firebasestorage.app",
+  messagingSenderId: "414217724367",
+  appId: "1:414217724367:web:edcda278193616587132ba"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const contadorRef = ref(database, "contador");
+
+runTransaction(contadorRef, (actual) => {
+  return (actual || 0) + 1;
+}).then((resultado) => {
+  if (resultado.committed) {
+    document.getElementById("contador").textContent =
+      resultado.snapshot.val();
+  }
+}).catch((error) => {
+  console.error(error);
+  document.getElementById("contador").textContent = "—";
+});
+</script>
+
 </body>
 </html>
