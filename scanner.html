@@ -26,7 +26,7 @@ h1 {
   margin: 30px auto;
   overflow: hidden;
   border-radius: 25px;
-  background: white;
+  background: black;
 }
 
 #estado {
@@ -43,7 +43,7 @@ h1 {
 
 <div id="reader"></div>
 
-<div id="estado">Apunta la cámara al código QR</div>
+<div id="estado">Iniciando cámara...</div>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -109,19 +109,34 @@ function qrDetectado(texto) {
   }, 400);
 }
 
-const lector = new Html5QrcodeScanner(
-  "reader",
-  {
-    fps: 10,
-    qrbox: {
-      width: 250,
-      height: 250
-    }
-  },
-  false
-);
+const lector = new Html5Qrcode("reader");
 
-lector.render(qrDetectado);
+async function iniciarCamara() {
+  try {
+    await lector.start(
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+      qrDetectado
+    );
+
+    document.getElementById("estado").textContent =
+      "Apunta la cámara al código QR";
+
+  } catch (error) {
+    console.error(error);
+
+    document.getElementById("estado").textContent =
+      "Se necesita permiso para usar la cámara";
+  }
+}
+
+iniciarCamara();
 </script>
 
 </body>
