@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lector SK</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #55c8f5;
+  font-family: Arial, sans-serif;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 40px;
+  font-size: 36px;
+}
+
+#reader {
+  width: 90%;
+  max-width: 500px;
+  margin: 30px auto;
+  overflow: hidden;
+  border-radius: 25px;
+  background: white;
+}
+
+#estado {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Lector SK</h1>
+
+<div id="reader"></div>
+
+<div id="estado">Apunta la cámara al código QR</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+let bloqueado = false;
+
+function bip() {
+  const audio =
+    new (window.AudioContext || window.webkitAudioContext)();
+
+  const ahora = audio.currentTime;
+
+  function tono(frecuencia, inicio, duracion) {
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(
+      frecuencia,
+      ahora + inicio
+    );
+
+    gain.gain.setValueAtTime(
+      0.001,
+      ahora + inicio
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.18,
+      ahora + inicio + 0.015
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      ahora + inicio + duracion
+    );
+
+    osc.connect(gain);
+    gain.connect(audio.destination);
+
+    osc.start(ahora + inicio);
+    osc.stop(ahora + inicio + duracion);
+  }
+
+  tono(880, 0, 0.12);
+  tono(1320, 0.10, 0.18);
+
+  setTimeout(() => audio.close(), 400);
+}
+
+function qrDetectado(texto) {
+  if (bloqueado) return;
+
+  bloqueado = true;
+
+  document.getElementById("estado").textContent =
+    "QR detectado ✓";
+
+  bip();
+
+  setTimeout(() => {
+    window.location.href = texto;
+  }, 400);
+}
+
+const lector = new Html5QrcodeScanner(
+  "reader",
+  {
+    fps: 10,
+    qrbox: {
+      width: 250,
+      height: 250
+    }
+  },
+  false
+);
+
+lector.render(qrDetectado);
+</script>
+
+</body>
+</html>
